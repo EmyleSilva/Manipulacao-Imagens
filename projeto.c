@@ -10,10 +10,10 @@ int validacao_entrada(char[]);
 int main(void) {
     setlocale (LC_ALL, "");
 
-    //Declaração de variáveis
     int opcao = 0, lin = 0, col = 0, brilho = 0, limite = 0, diferenca, media;
-    //Variaveis para calculos auxiliares
-    int auxopc = 0, auxvalid, validacao, auxlin = 0, auxcol = 0;
+    int auxopc = 0, auxvalid, validacao, auxlin = 0, auxcol = 0, maxlin = 0, maxcol = 0;
+    int ajusteCol = 0;
+    float quantVizinhos = 0.0;
     char opc[5];
 
     //Inicio do Menu
@@ -203,8 +203,8 @@ int main(void) {
                     break;
 
             case 8: //Deteccao e correcao de ruidos
-                    printf("\n\n\t\t***************** DETEC��O E CORRE��O DE RU�DOS *****************\n");
-                    printf("\n\t\tDigite o limite para ru�do na imagem");
+                    printf("\n\n\t\t***************** DETECÇÃO E CORREÇÃO DE RUÍDOS *****************\n");
+                    printf("\n\t\tDigite o limite para ruído na imagem");
                     printf("\n\t\tLimite: ");
                     scanf("%[^\n]", opc);
                     scanf("%*c");
@@ -215,79 +215,53 @@ int main(void) {
 
                     for(lin = 0; lin < nlin; lin++){
                         for(col = 0; col < ncol; col++){
-                            //Teste para numeros que possuem 8 vizinhanca
-                            if(lin > 0 && lin < (nlin - 1) && col > 0 && col < (ncol - 1)){
-                                media = ((imagem[lin-1][col-1]) +
-                                        (imagem[lin-1][col]) +
-                                        (imagem[lin-1][col+1]) +
-                                        (imagem[lin][col-1]) +
-                                        (imagem[lin][col+1]) +
-                                        (imagem[lin+1][col-1]) +
-                                        (imagem[lin+1][col]) +
-                                        (imagem[lin+1][col+1])) * 0.125;
-                            }//Fim: teste 8 vizanhaca
-                            //TESTE PARA 4 PONTAS DAS EXTREMIDADES
-                            else if(lin == 0 && col == 0 || lin == 0 && col == (ncol - 1)||
-                                     lin == (nlin - 1) && col == 0 || lin == (nlin - 1) && col == (ncol - 1)){
-                                    //Teste para as linhas
-                                    if(lin == 0){
-                                        auxlin = lin + 1;
-                                    }else if(lin == (nlin - 1)){
-                                        auxlin = lin - 1;
-                                    }//Fim: teste para linha
+                            
+                            diferenca = media = quantVizinhos = 0;
+                            //Condicionais para rastrear os vizinhos (linha)
+                            if(lin > 0 && lin != nlin - 1){
+                                auxlin = lin - 1;
+                                maxlin = lin + 1;
+                            }else if(lin == nlin - 1){
+                                    auxlin = lin - 1;
+                                    maxlin = lin;
+                                }else{
+                                        auxlin = 0;
+                                        maxlin = lin + 1;
+                                }
 
-                                    //Teste para as colunas
-                                    if(col == 0){
-                                        auxcol = col + 1;
-                                    }else if(col == (ncol - 1)){
-                                        auxcol = col - 1;
-                                    }//Fim: teste para coluna
+                            //Rastreia os vizinhos das colunas
+                            if(col > 0 && col != ncol -1){
+                                ajusteCol = auxcol = col - 1;
+                                maxcol = col + 1;
+                            }else if(col == ncol - 1){
+                                    ajusteCol = auxcol = col -1;
+                                    maxcol = col;
+                                }else{
+                                        ajusteCol = auxcol = 0;
+                                        maxcol = col + 1;
+                                }
 
-                                    media = ((imagem[auxlin][col]) +
-                                             (imagem[lin][auxcol]) +
-                                             (imagem[auxlin][auxcol])) * 0.33333333333;
-                            }//Fim: teste para as 4 pontas
-                            //TESTE PARA AS DEMAIS EXTREMIDADES
-                            else {//Teste para linha 0 (extremidades)
-                                if(lin == 0){
-                                    media = ((imagem[lin + 1][col]) +
-                                             (imagem[lin + 1][col + 1]) +
-                                             (imagem[lin + 1][col - 1]) +
-                                             (imagem[lin][col + 1]) +
-                                             (imagem[lin][col - 1])) * 0.2;
-                                }//Fim: teste linha 0 (extremidades)
-                                else {//teste para linha n(extremidades)
-                                   media = ((imagem[lin - 1][col]) +
-                                            (imagem[lin - 1][col + 1]) +
-                                            (imagem[lin - 1][col - 1]) +
-                                            (imagem[lin][col + 1]) +
-                                            (imagem[lin][col - 1])) * 0.2;
-                                //teste para coluna 0(extremidades)
-                                if(col == 0){
-                                    media = ((imagem[lin][col + 1]) +
-                                             (imagem[lin + 1][col + 1]) +
-                                             (imagem[lin - 1][col + 1]) +
-                                             (imagem[lin + 1][col]) +
-                                             (imagem[lin - 1][col])) * 0.2;
-                                }//Fim: teste coluna 0(extremidades)
-                                else if(col == ncol - 1){
-                                    media = ((imagem[lin][col - 1]) +
-                                             (imagem[lin + 1][col - 1]) +
-                                             (imagem[lin - 1][col - 1]) +
-                                             (imagem[lin + 1][col]) +
-                                             (imagem[lin - 1][col])) * 0.2;
-                                }//Fim: teste coluna n (extremidades)
-                                }//Fim: da linha n (extremidades)
-                            }//Fim: teste das demais extremidades
-
-                            //TESTE PARA SABER SE EXISTE RUIDO E CORRECAO
-
-                            diferenca = media - imagem[lin][col];
+                            //Fors para fazer a  media dos vizinhos
+                            for(; auxlin <= maxlin; auxlin++){
+                                auxcol = ajusteCol;
+                                for(; auxcol <= maxcol; auxcol++){
+                                    if(auxlin == lin && auxcol == col) continue;
+                                    media += imagem[auxlin][auxcol];
+                                    quantVizinhos++;
+                                }
+                            }
+                            
+                            quantVizinhos = (quantVizinhos == 3) ?  0.33333333333 : (quantVizinhos == 5) ?
+                                            0.2 : 0.125;
+                            
+                            //Calcular media e verificar se há ruído
+                            media*=quantVizinhos;
+                            diferenca = (int) media - imagem[lin][col];
                             diferenca = (diferenca < 0) ? diferenca * (-1) : diferenca;
                             if(diferenca > limite){
-                                imagem[lin][col] = media;
-                            }//Fim: correcao de ruido
-
+                                imagem[lin][col] = (int) media;
+                            }
+                           
                         }//Fim: laco da coluna
                     }//Fim: laco da linha
 

@@ -1,0 +1,6 @@
+# Ignorar arquivos de configuração de IDEs
+.vscode/
+
+# Ignorar arquivos de execução
+*.o
+

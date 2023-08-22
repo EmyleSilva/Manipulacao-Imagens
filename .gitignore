@@ -4,3 +4,7 @@
 # Ignorar arquivos de execução
 *.o
 
+# Ignorar arquivos executáveis
+projeto
+.exe
+

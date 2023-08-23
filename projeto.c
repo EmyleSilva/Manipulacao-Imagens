@@ -1,18 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
+#include <string.h>
 #include "projeto.h"
 
-//Prototipo de funções
+//Prototipos de funções
 void mensagem_final(void);
-int validacao_entrada(char[]);
+int validacao_entrada(char[], int, char[]);
 
 int main(void) {
     setlocale (LC_ALL, "");
 
     int opcao = 0, lin = 0, col = 0, brilho = 0, limite = 0, diferenca, media;
     int auxopc = 0, auxvalid, validacao, auxlin = 0, auxcol = 0, maxlin = 0, maxcol = 0;
-    int ajusteCol = 0;
+    int ajusteCol = 0, nivelCinza;
     float quantVizinhos = 0.0;
     char opc[5];
 
@@ -42,10 +43,10 @@ int main(void) {
         //Transformar char em int (VALIDACAO DE ENTRADA)
         for(auxopc = 0; opc[auxopc]!= '\0'; auxopc++);
             if(auxopc > 1){
-                opcao = 10;
+                opcao = -1;
             }else if(opc[0] >= 48 && opc[0] <= 56){
                 opcao = opc[0] - 48;
-            }else opcao = 10;
+            }else opcao = -1;
      //Fim da validacao
 
         //Operacoes a serem realizadas
@@ -65,12 +66,12 @@ int main(void) {
                     abrir_imagem();
                     int matrizaux[nlin][ncol];
 
-                    //Cria��o de matriz auxiliar para substituicao de valores na imagem
+                    //Criação de matriz auxiliar para substituicao de valores na imagem
                     for(lin = 0; lin < nlin; lin++){
                         for(col = 0; col < ncol; col++){
                             matrizaux[lin][col] = imagem[lin][col];
                         }//Fim: laço coluna
-                    }//Fim: la�o linha
+                    }//Fim: laço linha
 
                     //Operacao para rotacionar no sentido horario
                     for(lin = 0; lin < nlin; lin++){
@@ -158,14 +159,16 @@ int main(void) {
 
             case 6: //Aumento de Brilho
                     printf("\n\n\t\t***************** AUMENTAR BRILHO *****************\n");
+
+                    abrir_imagem();
+
                     printf("\n\t\tNível de brilho desejado, escolha entre 0 e 255"
                            "\n\t\tAumentar em:  ");
                     scanf("%[^\n]", opc);
                     scanf("%*c");
 
-                    brilho = validacao_entrada(opc);
+                    brilho = validacao_entrada(opc, quant_nivel_cinza, "brilho");
 
-                    abrir_imagem();
                     //Aumentar intensidade do brilho
                     for(lin = 0; lin < nlin; lin++){
                         for(col = 0; col < ncol; col++){
@@ -181,14 +184,16 @@ int main(void) {
 
             case 7: //Diminuicao de brilho
                     printf("\n\n\t\t***************** DIMINUIR BRILHO *****************\n");
+
+                    abrir_imagem();
+
                     printf("\n\t\tNível de brilho desejado, escolha entre 0 e 255"
                            "\n\t\tDiminuir em:  ");
                     scanf("%[^\n]", opc);
                     scanf("%*c");
 
-                    brilho = validacao_entrada(opc);
+                    brilho = validacao_entrada(opc, quant_nivel_cinza, "brilho");
 
-                    abrir_imagem();
                     //Diminuir intensidade do Brilho
                     for(lin = 0; lin < nlin; lin++){
                         for(col = 0; col < ncol; col++){
@@ -204,14 +209,15 @@ int main(void) {
 
             case 8: //Deteccao e correcao de ruidos
                     printf("\n\n\t\t***************** DETECÇÃO E CORREÇÃO DE RUÍDOS *****************\n");
+
+                    abrir_imagem();
+
                     printf("\n\t\tDigite o limite para ruído na imagem");
                     printf("\n\t\tLimite: ");
                     scanf("%[^\n]", opc);
                     scanf("%*c");
 
-                    limite = validacao_entrada(opc);
-
-                    abrir_imagem();
+                    limite = validacao_entrada(opc, quant_nivel_cinza, "limite");
 
                     for(lin = 0; lin < nlin; lin++){
                         for(col = 0; col < ncol; col++){
@@ -241,7 +247,7 @@ int main(void) {
                                         maxcol = col + 1;
                                 }
 
-                            //Fors para fazer a  media dos vizinhos
+                            //Faz a media dos vizinhos
                             for(; auxlin <= maxlin; auxlin++){
                                 auxcol = ajusteCol;
                                 for(; auxcol <= maxcol; auxcol++){
@@ -274,7 +280,7 @@ int main(void) {
                      */
                      system("clear || cls");
                      printf("\n\t\t==================================================================\n\n");
-                     printf("\n\t\t        ERRO - OP��O INEXISTENTE... Selecione novamente.\n\n\n");
+                     printf("\n\t\t        ERRO - OPÇÃO INEXISTENTE... Selecione novamente.\n\n\n");
                      printf("\t\t                (Aperte ENTER para retornar ao menu)");
                      printf("\n\n\t\t==================================================================");
                      scanf("%*c");
@@ -298,12 +304,15 @@ void mensagem_final(void){
     system("clear || cls");
 }
 
-int validacao_entrada(char opc[10]){
+//Função para validar entradas (como as opções de brilho e limite)
+int validacao_entrada(char opc[10], int quant_nivel_cinza, char tipo[10]){
     
-    int auxvalid, retorno, validacao, auxopc, col;
-    int quant_nivel_cinza = 255;
+    int auxvalid, retorno, validacao, auxopc, col, saida;
 
      do{
+            /*Descobrir se a operação é brilho ou limite*/
+            saida = (strcmp(tipo, "brilho"));
+
             auxvalid = 1;
             retorno = -1;
             validacao = 0;
@@ -322,7 +331,6 @@ int validacao_entrada(char opc[10]){
                         auxopc = opc[cont] - 48;
                         retorno += (auxopc * auxvalid);
                         auxvalid /= 10;
-                        printf("\n\n\tRETORNO: %d\n\n", retorno);
                     }else{
                         validacao = 1;
                         retorno = -2;
@@ -332,17 +340,16 @@ int validacao_entrada(char opc[10]){
             }//fim: validacao de tamanho da string/numero
 
                 retorno++;
-                //Validacao de intervalo do limite
+                //Verifica se o numero está dentro do intervalo permitido
                 if(retorno < 0 || retorno > quant_nivel_cinza){
-                    printf("\n\t\tERRO - Valor inválido. Digite novamente");
-                    printf("\n\t\tValor: ");
+                    printf("\n\t\tERRO - Valor inválido para %s. Digite novamente", (!saida) ? "brilho" : "limite");
+                    printf("\n\t\t%s: ", (!saida) ? "brilho" : "limite");
                     scanf("%[^\n]", opc);
                     scanf("%*c");
                     retorno = 0;
                     validacao = 1;
                 }
             }while(validacao);
-
     return retorno;
 
 }

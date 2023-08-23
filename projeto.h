@@ -10,13 +10,13 @@ void fechar_arquivos(void);
 
 void abrir_arquivos(void) {
    char nomeIN[50], nomeOUT[50];
-   printf("\n\t\tQual o nome do arquivo que contém a imagem?\n\t\t");
+   printf("\n\t\tQual o nome do arquivo que contÃ©m a imagem?\n\t\t");
    scanf("%[^\n]%*c",nomeIN);
    if ((fpin=fopen(nomeIN,"r"))==NULL) {
         printf("\t\tNao foi possivel abrir arquivo de imagem\n");
         exit(1);
    }
-   printf("\n\t\tQual o nome do arquivo de saída?\n\t\t");
+   printf("\n\t\tQual o nome do arquivo de saÃ­da?\n\t\t");
    scanf("%[^\n]%*c",nomeOUT);
    if ((fpout=fopen(nomeOUT,"w"))==NULL) {
         printf("\t\tNao foi possivel abrir arquivo de saida\n");
